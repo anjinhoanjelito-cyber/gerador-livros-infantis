@@ -1,4 +1,626 @@
-/* Adicione no final do arquivo styles.css */
+/* ============================================
+   GERADOR DE LIVROS INFANTIS - STYLES
+   ============================================ */
+
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --primary: #667eea;
+    --primary-dark: #5568d3;
+    --secondary: #764ba2;
+    --success: #28a745;
+    --danger: #dc3545;
+    --warning: #ffc107;
+    --light: #f8f9fa;
+    --dark: #343a40;
+    --border: #e0e0e0;
+    --shadow: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+
+.header {
+    text-align: center;
+    color: white;
+    margin-bottom: 30px;
+    padding: 40px 20px;
+}
+
+.header h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+}
+
+.tagline {
+    font-size: 1.2rem;
+    opacity: 0.95;
+    margin-bottom: 15px;
+}
+
+.badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    backdrop-filter: blur(10px);
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+
+.card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 20px;
+    box-shadow: 0 20px 60px var(--shadow);
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.section-header h2 {
+    color: var(--primary);
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.section-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.success-header h2 {
+    color: var(--success);
+}
+
+/* ============================================
+   API INSTRUCTIONS
+   ============================================ */
+
+.api-instructions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.api-card {
+    background: var(--light);
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid var(--border);
+}
+
+.api-card h3 {
+    color: var(--primary);
+    margin-bottom: 10px;
+    font-size: 1.3rem;
+}
+
+.api-card p {
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 0.95rem;
+}
+
+.api-card ol {
+    margin-left: 20px;
+    color: #555;
+}
+
+.api-card li {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.api-card code {
+    background: #fff;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+
+.api-card a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.api-card a:hover {
+    text-decoration: underline;
+}
+
+.bonus-badge {
+    background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px dashed var(--border);
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    color: var(--primary);
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.label-icon {
+    margin-right: 5px;
+}
+
+.required {
+    color: var(--danger);
+    margin-left: 3px;
+}
+
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea,
+select {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: all 0.3s;
+    background: white;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-help {
+    display: block;
+    margin-top: 6px;
+    color: #666;
+    font-size: 0.875rem;
+}
+
+/* ============================================
+   AGE BUTTONS
+   ============================================ */
+
+.age-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 10px;
+}
+
+.age-btn {
+    padding: 14px;
+    border: 2px solid var(--border);
+    background: white;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.2s;
+    color: var(--dark);
+}
+
+.age-btn:hover {
+    border-color: var(--primary);
+    background: rgba(102, 126, 234, 0.05);
+    transform: translateY(-2px);
+}
+
+.age-btn.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* ============================================
+   RANGE SLIDER
+   ============================================ */
+
+.slider-container {
+    margin-top: 15px;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: var(--border);
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 6px var(--shadow);
+}
+
+.range-display {
+    text-align: center;
+    margin-top: 12px;
+}
+
+.range-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.range-label {
+    font-size: 1rem;
+    color: #666;
+    margin-left: 5px;
+}
+
+/* ============================================
+   COST ESTIMATE
+   ============================================ */
+
+.cost-estimate {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin: 25px 0;
+    border: 2px dashed var(--primary);
+}
+
+.cost-label {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.cost-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary);
+}
+
+.cost-estimate small {
+    display: block;
+    margin-top: 5px;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* ============================================
+   BUTTONS
+   ============================================ */
+
+.btn {
+    padding: 14px 28px;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+.btn-success {
+    background: var(--success);
+    color: white;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+}
+
+.btn-success:hover {
+    background: #218838;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-large {
+    width: 100%;
+    padding: 18px;
+    font-size: 1.2rem;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ============================================
+   ALERTS
+   ============================================ */
+
+.alert {
+    padding: 15px 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    display: none;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert-success {
+    background: #d4edda;
+    border: 2px solid #c3e6cb;
+    color: #155724;
+}
+
+.alert-error {
+    background: #f8d7da;
+    border: 2px solid #f5c6cb;
+    color: #721c24;
+}
+
+/* ============================================
+   PROGRESS
+   ============================================ */
+
+.progress-bar-container {
+    margin: 30px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 40px;
+    background: var(--light);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px var(--shadow);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+    transition: width 0.5s ease-out;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.progress-percent {
+    color: white;
+    font-weight: bold;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+.spinner {
+    border: 4px solid var(--light);
+    border-top: 4px solid var(--primary);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 30px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.status-box {
+    text-align: center;
+    padding: 20px;
+    background: var(--light);
+    border-radius: 15px;
+    margin: 20px 0;
+}
+
+.status-icon {
+    font-size: 3rem;
+    margin-bottom: 10px;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+.status-message {
+    font-size: 1.2rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* ============================================
+   PROGRESS STEPS
+   ============================================ */
+
+.progress-steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.step {
+    text-align: center;
+    padding: 15px;
+    background: var(--light);
+    border-radius: 12px;
+    opacity: 0.5;
+    transition: all 0.3s;
+}
+
+.step.active {
+    opacity: 1;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 2px solid var(--primary);
+}
+
+.step.completed {
+    opacity: 1;
+    background: #d4edda;
+}
+
+.step-number {
+    display: inline-block;
+    width: 35px;
+    height: 35px;
+    line-height: 35px;
+    border-radius: 50%;
+    background: white;
+    font-weight: bold;
+    color: var(--primary);
+    margin-bottom: 8px;
+}
+
+.step.completed .step-number {
+    background: var(--success);
+    color: white;
+}
+
+.step-label {
+    display: block;
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+/* ============================================
+   DEBUG CONSOLE
+   ============================================ */
 
 .debug-console {
     background: #f8f9fa;
@@ -28,26 +650,244 @@
     border-bottom: 1px solid #e9ecef;
 }
 
-.form-section {
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px dashed var(--border);
+/* ============================================
+   BOOK PREVIEW
+   ============================================ */
+
+.book-showcase {
+    position: relative;
+    max-width: 500px;
+    margin: 30px auto;
 }
 
-.section-title {
+.book-cover {
+    width: 100%;
+    border-radius: 15px;
+    box-shadow: 0 20px 60px var(--shadow);
+    display: block;
+    animation: bookAppear 0.8s ease-out;
+}
+
+@keyframes bookAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8) rotateY(-20deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotateY(0deg);
+    }
+}
+
+.book-shadow {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80%;
+    height: 20px;
+    background: radial-gradient(ellipse, var(--shadow), transparent);
+    opacity: 0.5;
+}
+
+.book-info {
+    background: var(--light);
+    padding: 25px;
+    border-radius: 15px;
+    margin: 25px 0;
+}
+
+.book-info h3 {
     color: var(--primary);
-    font-size: 1.3rem;
-    margin-bottom: 20px;
+    font-size: 1.8rem;
+    margin-bottom: 15px;
 }
 
-.form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
+.book-info p {
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 1rem;
 }
+
+.book-info strong {
+    color: var(--dark);
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 25px 0;
+}
+
+/* ============================================
+   SHARE SECTION
+   ============================================ */
+
+.share-section {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 2px dashed var(--border);
+}
+
+.share-label {
+    color: #666;
+    margin-bottom: 15px;
+    font-size: 1.05rem;
+}
+
+.share-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.share-btn {
+    padding: 10px 20px;
+    border: 2px solid;
+    background: white;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.share-whatsapp {
+    border-color: #25D366;
+    color: #25D366;
+}
+
+.share-whatsapp:hover {
+    background: #25D366;
+    color: white;
+}
+
+.share-twitter {
+    border-color: #1DA1F2;
+    color: #1DA1F2;
+}
+
+.share-twitter:hover {
+    background: #1DA1F2;
+    color: white;
+}
+
+.share-facebook {
+    border-color: #1877F2;
+    color: #1877F2;
+}
+
+.share-facebook:hover {
+    background: #1877F2;
+    color: white;
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+
+.footer {
+    text-align: center;
+    color: white;
+    padding: 30px 20px;
+    margin-top: 40px;
+}
+
+.footer p {
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.footer-tech {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+.footer-links {
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s;
+}
+
+.footer-links a:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+.footer-links span {
+    margin: 0 10px;
+    opacity: 0.5;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
 
 @media (max-width: 768px) {
+    .header h1 {
+        font-size: 2rem;
+    }
+
+    .tagline {
+        font-size: 1rem;
+    }
+
+    .card {
+        padding: 25px;
+    }
+
+    .api-instructions {
+        grid-template-columns: 1fr;
+    }
+
+    .age-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .progress-steps {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .share-buttons {
+        flex-direction: column;
+    }
+
     .form-row {
         grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    .header {
+        padding: 20px 10px;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 20px;
+        border-radius: 15px;
     }
 }
