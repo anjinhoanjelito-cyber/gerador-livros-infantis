@@ -92,85 +92,225 @@
             </div>
 
             <form id="bookForm">
-                <div class="form-group">
-                    <label for="theme">
-                        <span class="label-icon">✍️</span>
-                        Tema da História
-                        <span class="required">*</span>
-                    </label>
-                    <textarea 
-                        id="theme" 
-                        rows="4"
-                        required
-                        placeholder="Ex: Um dragão amigável que ensina crianças sobre reciclagem e proteção do meio ambiente..."
-                    ></textarea>
-                    <small class="form-help">💡 Quanto mais detalhes, melhor será a história!</small>
-                </div>
+                <!-- NOVO: Personalização do Personagem Principal -->
+                <div class="form-section">
+                    <h3 class="section-title">👤 Personagem Principal</h3>
 
-                <div class="form-group">
-                    <label>
-                        <span class="label-icon">👶</span>
-                        Idade da Criança
-                        <span class="required">*</span>
-                    </label>
-                    <div class="age-buttons">
-                        <button type="button" class="age-btn" data-age="2">0-2 anos</button>
-                        <button type="button" class="age-btn" data-age="4">3-4 anos</button>
-                        <button type="button" class="age-btn active" data-age="6">5-6 anos</button>
-                        <button type="button" class="age-btn" data-age="8">7-8 anos</button>
+                    <div class="form-group">
+                        <label for="characterName">
+                            <span class="label-icon">✏️</span>
+                            Nome do Personagem
+                        </label>
+                        <input 
+                            type="text" 
+                            id="characterName" 
+                            placeholder="Ex: Sofia, Pedro, Luna..."
+                        >
+                        <small class="form-help">💡 Deixe vazio para a IA criar um nome</small>
                     </div>
-                    <input type="hidden" id="age" value="6" required>
-                </div>
 
-                <div class="form-group">
-                    <label for="tone">
-                        <span class="label-icon">🎨</span>
-                        Tom da História
-                        <span class="required">*</span>
-                    </label>
-                    <select id="tone" required>
-                        <option value="aventura">🗺️ Aventura Emocionante</option>
-                        <option value="educativo">📚 Educativo e Didático</option>
-                        <option value="fantasia">🦄 Fantasia Mágica</option>
-                        <option value="engraçado">😄 Divertido e Engraçado</option>
-                        <option value="calmo">🌙 Calmo (para dormir)</option>
-                    </select>
-                </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="characterGender">Gênero</label>
+                            <select id="characterGender">
+                                <option value="">IA decide</option>
+                                <option value="menina">Menina</option>
+                                <option value="menino">Menino</option>
+                                <option value="neutro">Neutro/Animal</option>
+                            </select>
+                        </div>
 
-                <div class="form-group">
-                    <label>
-                        <span class="label-icon">📄</span>
-                        Número de Páginas
-                    </label>
-                    <div class="slider-container">
-                        <input type="range" id="numPages" min="4" max="8" step="2" value="6">
-                        <div class="range-display">
-                            <span id="pagesDisplay" class="range-value">6</span>
-                            <span class="range-label">páginas</span>
+                        <div class="form-group">
+                            <label for="characterAge">Idade do Personagem</label>
+                            <select id="characterAge">
+                                <option value="">Mesma da criança</option>
+                                <option value="bebê">Bebê</option>
+                                <option value="criança">Criança (5-8 anos)</option>
+                                <option value="pré-adolescente">Pré-adolescente (9-12 anos)</option>
+                            </select>
                         </div>
                     </div>
-                    <small class="form-help">⏱️ Tempo estimado: <span id="timeEstimate">3-4 minutos</span></small>
+
+                    <div class="form-group">
+                        <label for="skinTone">
+                            <span class="label-icon">🎨</span>
+                            Tom de Pele
+                        </label>
+                        <select id="skinTone">
+                            <option value="">IA decide (diversidade)</option>
+                            <option value="pele clara">Pele clara</option>
+                            <option value="pele média">Pele média</option>
+                            <option value="pele morena">Pele morena</option>
+                            <option value="pele negra">Pele negra</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="hairType">Cabelo</label>
+                            <select id="hairType">
+                                <option value="">IA decide</option>
+                                <option value="cabelo liso">Liso</option>
+                                <option value="cabelo ondulado">Ondulado</option>
+                                <option value="cabelo cacheado">Cacheado</option>
+                                <option value="cabelo crespo">Crespo</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="hairColor">Cor do Cabelo</label>
+                            <select id="hairColor">
+                                <option value="">IA decide</option>
+                                <option value="preto">Preto</option>
+                                <option value="castanho escuro">Castanho escuro</option>
+                                <option value="castanho">Castanho</option>
+                                <option value="loiro">Loiro</option>
+                                <option value="ruivo">Ruivo</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eyeColor">Cor dos Olhos</label>
+                        <select id="eyeColor">
+                            <option value="">IA decide</option>
+                            <option value="olhos castanhos">Castanhos</option>
+                            <option value="olhos pretos">Pretos</option>
+                            <option value="olhos verdes">Verdes</option>
+                            <option value="olhos azuis">Azuis</option>
+                            <option value="olhos mel">Mel</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="characterClothes">
+                            <span class="label-icon">👕</span>
+                            Roupas/Estilo
+                        </label>
+                        <input 
+                            type="text" 
+                            id="characterClothes" 
+                            placeholder="Ex: vestido azul com flores, camiseta de super-herói..."
+                        >
+                        <small class="form-help">💡 Descreva as roupas principais do personagem</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="characterTraits">
+                            <span class="label-icon">⭐</span>
+                            Características Especiais (opcional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="characterTraits" 
+                            placeholder="Ex: usa óculos, tem sardas, adora animais..."
+                        >
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="authorName">
-                        <span class="label-icon">✏️</span>
-                        Nome do Autor (você!)
-                        <span class="required">*</span>
-                    </label>
-                    <input 
-                        type="text" 
-                        id="authorName" 
-                        required
-                        placeholder="Ex: Mamãe Maria, Papai João..."
-                    >
-                    <small class="form-help">📝 Este nome aparecerá na capa do livro</small>
+                <!-- História -->
+                <div class="form-section">
+                    <h3 class="section-title">📚 Sobre a História</h3>
+
+                    <div class="form-group">
+                        <label for="theme">
+                            <span class="label-icon">✍️</span>
+                            Tema/Enredo da História
+                            <span class="required">*</span>
+                        </label>
+                        <textarea 
+                            id="theme" 
+                            rows="5"
+                            required
+                            placeholder="Descreva a história que você quer criar. Seja criativo!
+
+Exemplo: Uma aventura onde o personagem descobre um portal mágico no quintal que leva a um mundo onde os animais falam e precisam de ajuda para salvar sua floresta da poluição."
+                        ></textarea>
+                        <small class="form-help">💡 Quanto mais detalhes, melhor será a história!</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="moralLesson">
+                            <span class="label-icon">💭</span>
+                            Mensagem/Lição (opcional)
+                        </label>
+                        <input 
+                            type="text" 
+                            id="moralLesson" 
+                            placeholder="Ex: Importância da amizade, cuidado com o meio ambiente..."
+                        >
+                    </div>
+                </div>
+
+                <!-- Configurações -->
+                <div class="form-section">
+                    <h3 class="section-title">⚙️ Configurações</h3>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="label-icon">👶</span>
+                            Idade da Criança (quem vai ler)
+                            <span class="required">*</span>
+                        </label>
+                        <div class="age-buttons">
+                            <button type="button" class="age-btn" data-age="2">0-2 anos</button>
+                            <button type="button" class="age-btn" data-age="4">3-4 anos</button>
+                            <button type="button" class="age-btn active" data-age="6">5-6 anos</button>
+                            <button type="button" class="age-btn" data-age="8">7-8 anos</button>
+                        </div>
+                        <input type="hidden" id="age" value="6" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tone">
+                            <span class="label-icon">🎨</span>
+                            Tom da História
+                            <span class="required">*</span>
+                        </label>
+                        <select id="tone" required>
+                            <option value="aventura">🗺️ Aventura Emocionante</option>
+                            <option value="educativo">📚 Educativo e Didático</option>
+                            <option value="fantasia">🦄 Fantasia Mágica</option>
+                            <option value="engraçado">😄 Divertido e Engraçado</option>
+                            <option value="calmo">🌙 Calmo (para dormir)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <span class="label-icon">📄</span>
+                            Número de Páginas
+                        </label>
+                        <div class="slider-container">
+                            <input type="range" id="numPages" min="8" max="40" step="2" value="16">
+                            <div class="range-display">
+                                <span id="pagesDisplay" class="range-value">16</span>
+                                <span class="range-label">páginas</span>
+                            </div>
+                        </div>
+                        <small class="form-help">⏱️ Tempo estimado: <span id="timeEstimate">8-12 minutos</span></small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="authorName">
+                            <span class="label-icon">✏️</span>
+                            Nome do Autor (você!)
+                            <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="authorName" 
+                            required
+                            placeholder="Ex: Mamãe Maria, Papai João..."
+                        >
+                        <small class="form-help">📝 Este nome aparecerá na capa do livro</small>
+                    </div>
                 </div>
 
                 <div class="cost-estimate">
                     <div class="cost-label">💰 Custo estimado desta geração:</div>
-                    <div class="cost-value">~R$ 0,75</div>
-                    <small>(cobrado das suas APIs)</small>
+                    <div class="cost-value" id="costEstimate">~R$ 0,50</div>
+                    <small>(cobrado das suas APIs - <span id="apiCostDetail">história + imagens</span>)</small>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-large" id="generateBtn">
@@ -221,6 +361,11 @@
                     <span class="step-number">4</span>
                     <span class="step-label">Montando PDF</span>
                 </div>
+            </div>
+
+            <div class="debug-console" id="debugConsole">
+                <h4>📋 Log de Progresso:</h4>
+                <div id="debugLog"></div>
             </div>
         </div>
 
