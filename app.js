@@ -7,7 +7,7 @@ let CONFIG = {
     anthropicKey: localStorage.getItem('anthropicKey') || '',
     replicateKey: localStorage.getItem('replicateKey') || '',
     // Proxy CORS para contornar restrições
-    corsProxy: 'https://corsproxy.io/?'
+    https://livros-infantis-api.anjinhoanjelito.workers.dev/
 };
 
 let currentBook = null;
@@ -816,3 +816,4 @@ function resetApp() {
 }
 
 console.log('✨ Gerador de Livros carregado!');
+
