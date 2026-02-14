@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Crie livros infantis personalizados com Inteligência Artificial">
+    <title>Gerador de Livros Infantis com IA - Teste Grátis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>✨ Gerador de Livros Infantis</h1>
+            <p class="tagline">Crie histórias mágicas personalizadas com Inteligência Artificial</p>
+            <div class="badge">🧪 Versão de Teste - 100% Funcional</div>
+        </header>
+
+        <!-- Configuração de API Keys -->
+        <div class="card api-key-section" id="apiSection">
+            <div class="section-header">
+                <h2>⚙️ Configuração Inicial</h2>
+                <p>Obtenha chaves API gratuitas para começar a criar livros incríveis!</p>
+            </div>
+
+            <div class="api-instructions">
+                <div class="api-card">
+                    <h3>🤖 Claude API (Anthropic)</h3>
+                    <p>Usado para gerar as histórias</p>
+                    <ol>
+                        <li>Acesse: <a href="https://console.anthropic.com/" target="_blank">console.anthropic.com</a></li>
+                        <li>Crie conta grátis</li>
+                        <li>Vá em "API Keys" e crie uma chave</li>
+                        <li>Copie a chave (começa com <code>sk-ant-</code>)</li>
+                    </ol>
+                    <div class="bonus-badge">🎁 $5 de crédito grátis (~100 livros)</div>
+                </div>
+
+                <div class="api-card">
+                    <h3>🎨 Replicate API</h3>
+                    <p>Usado para gerar as ilustrações</p>
+                    <ol>
+                        <li>Acesse: <a href="https://replicate.com/" target="_blank">replicate.com</a></li>
+                        <li>Crie conta grátis</li>
+                        <li>Vá em Account → API Tokens</li>
+                        <li>Copie o token (começa com <code>r8_</code>)</li>
+                    </ol>
+                    <div class="bonus-badge">🎁 Testes gratuitos inclusos</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="anthropicKey">
+                    <span class="label-icon">🔑</span>
+                    Chave Anthropic (Claude)
+                </label>
+                <input 
+                    type="password" 
+                    id="anthropicKey" 
+                    placeholder="sk-ant-api03-..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="replicateKey">
+                    <span class="label-icon">🔑</span>
+                    Token Replicate
+                </label>
+                <input 
+                    type="password" 
+                    id="replicateKey" 
+                    placeholder="r8_..."
+                    autocomplete="off"
+                >
+            </div>
+
+            <button class="btn btn-primary" onclick="saveApiKeys()">
+                <span class="btn-icon">💾</span>
+                Salvar e Começar
+            </button>
+
+            <div id="apiSuccess" class="alert alert-success"></div>
+            <div id="apiError" class="alert alert-error"></div>
+        </div>
+
+        <!-- Formulário Principal -->
+        <div class="card" id="formCard" style="display: none;">
+            <div class="section-header">
+                <h2>📖 Criar Seu Livro Mágico</h2>
+                <p>Preencha os dados abaixo e deixe a magia acontecer!</p>
+            </div>
+
+            <form id="bookForm">
+                <div class="form-group">
+                    <label for="theme">
+                        <span class="label-icon">✍️</span>
+                        Tema da História
+                        <span class="required">*</span>
+                    </label>
+                    <textarea 
+                        id="theme" 
+                        rows="4"
+                        required
+                        placeholder="Ex: Um dragão amigável que ensina crianças sobre reciclagem e proteção do meio ambiente..."
+                    ></textarea>
+                    <small class="form-help">💡 Quanto mais detalhes, melhor será a história!</small>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon">👶</span>
+                        Idade da Criança
+                        <span class="required">*</span>
+                    </label>
+                    <div class="age-buttons">
+                        <button type="button" class="age-btn" data-age="2">0-2 anos</button>
+                        <button type="button" class="age-btn" data-age="4">3-4 anos</button>
+                        <button type="button" class="age-btn active" data-age="6">5-6 anos</button>
+                        <button type="button" class="age-btn" data-age="8">7-8 anos</button>
+                    </div>
+                    <input type="hidden" id="age" value="6" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="tone">
+                        <span class="label-icon">🎨</span>
+                        Tom da História
+                        <span class="required">*</span>
+                    </label>
+                    <select id="tone" required>
+                        <option value="aventura">🗺️ Aventura Emocionante</option>
+                        <option value="educativo">📚 Educativo e Didático</option>
+                        <option value="fantasia">🦄 Fantasia Mágica</option>
+                        <option value="engraçado">😄 Divertido e Engraçado</option>
+                        <option value="calmo">🌙 Calmo (para dormir)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <span class="label-icon">📄</span>
+                        Número de Páginas
+                    </label>
+                    <div class="slider-container">
+                        <input type="range" id="numPages" min="4" max="8" step="2" value="6">
+                        <div class="range-display">
+                            <span id="pagesDisplay" class="range-value">6</span>
+                            <span class="range-label">páginas</span>
+                        </div>
+                    </div>
+                    <small class="form-help">⏱️ Tempo estimado: <span id="timeEstimate">3-4 minutos</span></small>
+                </div>
+
+                <div class="form-group">
+                    <label for="authorName">
+                        <span class="label-icon">✏️</span>
+                        Nome do Autor (você!)
+                        <span class="required">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="authorName" 
+                        required
+                        placeholder="Ex: Mamãe Maria, Papai João..."
+                    >
+                    <small class="form-help">📝 Este nome aparecerá na capa do livro</small>
+                </div>
+
+                <div class="cost-estimate">
+                    <div class="cost-label">💰 Custo estimado desta geração:</div>
+                    <div class="cost-value">~R$ 0,75</div>
+                    <small>(cobrado das suas APIs)</small>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" id="generateBtn">
+                    <span class="btn-icon">✨</span>
+                    Gerar Meu Livro Agora
+                </button>
+            </form>
+
+            <div id="formError" class="alert alert-error"></div>
+        </div>
+
+        <!-- Progresso -->
+        <div class="card progress-card" id="progressCard" style="display: none;">
+            <div class="section-header">
+                <h2>🎨 Criando Seu Livro Mágico...</h2>
+                <p>Por favor, aguarde. Isso pode levar alguns minutos.</p>
+            </div>
+
+            <div class="progress-bar-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill">
+                        <span class="progress-percent" id="progressPercent">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="spinner"></div>
+
+            <div class="status-box">
+                <div class="status-icon" id="statusIcon">⏳</div>
+                <p class="status-message" id="statusMessage">Iniciando processo...</p>
+            </div>
+
+            <div class="progress-steps">
+                <div class="step" id="step1">
+                    <span class="step-number">1</span>
+                    <span class="step-label">Gerando história</span>
+                </div>
+                <div class="step" id="step2">
+                    <span class="step-number">2</span>
+                    <span class="step-label">Criando capa</span>
+                </div>
+                <div class="step" id="step3">
+                    <span class="step-number">3</span>
+                    <span class="step-label">Ilustrando páginas</span>
+                </div>
+                <div class="step" id="step4">
+                    <span class="step-number">4</span>
+                    <span class="step-label">Montando PDF</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview do Livro -->
+        <div class="card preview-card" id="previewCard" style="display: none;">
+            <div class="section-header success-header">
+                <h2>🎉 Seu Livro Está Pronto!</h2>
+                <p>Parabéns! Seu livro foi criado com sucesso.</p>
+            </div>
+
+            <div class="book-showcase">
+                <img id="bookCover" class="book-cover" alt="Capa do livro">
+                <div class="book-shadow"></div>
+            </div>
+
+            <div class="book-info" id="bookInfo">
+                <!-- Preenchido dinamicamente -->
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-success btn-large" id="downloadBtn">
+                    <span class="btn-icon">⬇️</span>
+                    Baixar PDF do Livro
+                </button>
+
+                <button class="btn btn-secondary" onclick="location.reload()">
+                    <span class="btn-icon">🔄</span>
+                    Criar Outro Livro
+                </button>
+            </div>
+
+            <div class="share-section">
+                <p class="share-label">Adorou o resultado? Compartilhe!</p>
+                <div class="share-buttons">
+                    <button class="share-btn share-whatsapp" onclick="shareWhatsApp()">
+                        <span>📱</span> WhatsApp
+                    </button>
+                    <button class="share-btn share-twitter" onclick="shareTwitter()">
+                        <span>🐦</span> Twitter
+                    </button>
+                    <button class="share-btn share-facebook" onclick="shareFacebook()">
+                        <span>📘</span> Facebook
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Feito com ❤️ usando Inteligência Artificial</p>
+            <p class="footer-tech">
+                <span>Powered by: Claude (Anthropic) + FLUX (Replicate)</span>
+            </p>
+            <div class="footer-links">
+                <a href="https://github.com" target="_blank">GitHub</a>
+                <span>•</span>
+                <a href="#" onclick="showHelp(); return false;">Ajuda</a>
+                <span>•</span>
+                <a href="#" onclick="resetApp(); return false;">Resetar</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
