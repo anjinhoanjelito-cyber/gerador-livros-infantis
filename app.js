@@ -2,11 +2,10 @@
 // GERADOR DE LIVROS INFANTIS - V3 CORRIGIDA
 // ============================================
 
-// Configuração Global
 let CONFIG = {
     anthropicKey: localStorage.getItem('anthropicKey') || '',
     replicateKey: localStorage.getItem('replicateKey') || '',
-    workerUrl: https://livros-infantis-api.anjinhoanjelito.workers.dev/
+    workerUrl: 'https://livros-infantis-api.anjinhoanjelito.workers.dev'
 };
 
 let currentBook = null;
@@ -70,6 +69,8 @@ function setupEventListeners() {
 // ============================================
 
 function saveApiKeys() {
+    console.log('🔧 saveApiKeys chamada!');
+
     const anthropicKey = document.getElementById('anthropicKey').value.trim();
     const replicateKey = document.getElementById('replicateKey').value.trim();
 
@@ -451,7 +452,6 @@ async function generatePDF(story, coverImage, illustrations, formData) {
     let illustrationMap = {};
     illustrations.forEach(ill => illustrationMap[ill.pageNumber] = ill.image);
 
-    // CAPA
     pdf.addImage(coverImage, 'PNG', 0, 0, pageWidth, pageHeight);
     pdf.setFillColor(0, 0, 0);
     pdf.setGState(new pdf.GState({opacity: 0.5}));
@@ -466,7 +466,6 @@ async function generatePDF(story, coverImage, illustrations, formData) {
     pdf.setFontSize(20);
     pdf.text(`Por ${formData.authorName}`, pageWidth / 2, pageHeight - 25, { align: 'center' });
 
-    // PÁGINAS
     pdf.addPage();
     pdf.setFillColor(252, 252, 255);
     pdf.rect(0, 0, pageWidth, pageHeight, 'F');
@@ -638,5 +637,3 @@ function toggleDarkMode() {
 }
 
 console.log('✨ Gerador de Livros carregado!');
-
-
