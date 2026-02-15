@@ -6,7 +6,7 @@
 let CONFIG = {
     anthropicKey: localStorage.getItem('anthropicKey') || '',
     replicateKey: localStorage.getItem('replicateKey') || '',
-    workerUrl: 'https://livros-infantis-api.anjinhoanjelito.workers.dev/'  // ← COLE SUA URL AQUI
+    workerUrl: 'https://livros-infantis-api.anjinhoanjelito.workers.dev/'
 };
 
 let currentBook = null;
@@ -638,3 +638,4 @@ function toggleDarkMode() {
 }
 
 console.log('✨ Gerador de Livros carregado!');
+
