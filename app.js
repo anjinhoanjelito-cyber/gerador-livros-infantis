@@ -1,10 +1,18 @@
 let CONFIG = {
     geminiKey: localStorage.getItem('geminiKey') || '',
     replicateKey: localStorage.getItem('replicateKey') || '',
+    // Se o worker der problema, podemos tentar usar proxy direto ou chamar API direta se permitido (CORS)
     workerUrl: 'https://livros-infantis-api.anjinhoanjelito.workers.dev'
 };
 
 let currentBook = null;
+
+// Configuração do Modelo - Mude aqui se der erro 404 novamente
+// Opções que você pode tentar:
+// "gemini-1.5-flash-latest" (Recomendado)
+// "gemini-1.5-flash-001" (Versão específica estável)
+// "gemini-pro" (Versão 1.0 - Fallback se tudo falhar, mas é menos criativo)
+const GEMINI_MODEL = "gemini-1.5-flash-latest";
 
 window.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -26,7 +34,6 @@ function initializeApp() {
 }
 
 function addResetButton() {
-    // Remove botão existente se houver para evitar duplicatas
     const existingBtn = document.getElementById('reset-keys-btn');
     if (existingBtn) existingBtn.remove();
 
@@ -59,7 +66,6 @@ function setupEventListeners() {
             document.getElementById('pagesDisplay').textContent = pages;
             const mins = Math.ceil(pages * 0.5);
             document.getElementById('timeEstimate').textContent = `${mins}-${mins + 2} minutos`;
-            // Custo estimado (ajustado para ser simbólico ou baseado em cálculo real)
             const cost = (0.05 + (Math.floor(pages / 2) * 0.04)).toFixed(2);
             document.getElementById('costEstimate').textContent = `~R$ ${cost}`;
         };
@@ -71,7 +77,6 @@ function setupEventListeners() {
     const dlBtn = document.getElementById('downloadBtn');
     if (dlBtn) dlBtn.onclick = downloadBook;
     
-    // Adicionado listener para salvar chaves se o botão existir no HTML
     const saveKeysBtn = document.querySelector('button[onclick="saveApiKeys()"]');
     if(saveKeysBtn) saveKeysBtn.onclick = saveApiKeys; 
 }
@@ -139,7 +144,6 @@ async function generateBook(formData) {
 
         updateProgress(10, 'Escrevendo a história com IA...', 1);
         
-        // Chamada corrigida para o Gemini
         const story = await callGeminiAPI(formData);
         
         if (!story || !story.pages) {
@@ -159,7 +163,6 @@ async function generateBook(formData) {
         const illustrations = [];
         const pages = story.pages.filter(p => p.needsIllustration);
         
-        // Limite de segurança para não gastar muitos créditos se houver erro
         const maxPagesToIllustrate = Math.min(pages.length, 12); 
 
         for (let i = 0; i < maxPagesToIllustrate; i++) {
@@ -172,7 +175,6 @@ async function generateBook(formData) {
             } catch (imgErr) {
                 console.error(`Erro na pag ${i+1}`, imgErr);
                 logDebug(`Falha img pag ${i+1}, usando placeholder.`);
-                // Poderia usar uma imagem padrão aqui se falhar
             }
         }
 
@@ -194,9 +196,8 @@ async function generateBook(formData) {
     }
 }
 
-// --- CORREÇÃO PRINCIPAL AQUI ---
 async function callGeminiAPI(formData) {
-    logDebug('Conectando ao Gemini 1.5 Flash (v1beta)...');
+    logDebug(`Conectando ao modelo: ${GEMINI_MODEL}...`);
 
     const prompt = `Você é um autor de livros infantis premiado. Crie uma história baseada nestes parâmetros:
 
@@ -205,7 +206,7 @@ Idade Alvo: ${formData.age} anos
 Tom da história: ${formData.tone}
 Número aproximado de páginas: ${formData.numPages}
 
-IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta estrutura, sem markdown, sem explicações adicionais:
+IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta estrutura:
 
 {
   "title": "Título Criativo da História",
@@ -225,8 +226,8 @@ IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta 
   "setting": "descrição do cenário"
 }`;
 
-    // MUDANÇA 1: URL atualizada para v1beta e modelo correto
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.geminiKey}`;
+    // --- CORREÇÃO AQUI: Usando o modelo definido no topo do arquivo ---
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${CONFIG.geminiKey}`;
 
     try {
         const response = await fetch(url, {
@@ -235,20 +236,26 @@ IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta 
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
                 generationConfig: { 
-                    temperature: 0.7, // Um pouco menos criativo para garantir formato
+                    temperature: 0.7,
                     maxOutputTokens: 8000,
-                    responseMimeType: "application/json" // MUDANÇA 2: Força resposta JSON nativa
+                    // Removemos o responseMimeType caso o modelo mude para gemini-pro (que não suporta esse campo)
+                    // Mas para 1.5 Flash ele ajuda muito. Vamos manter condicionalmente ou usar try/catch no parse.
+                    responseMimeType: "application/json" 
                 }
             })
         });
 
-        logDebug('Status Gemini: ' + response.status);
+        logDebug(`Status Gemini (${GEMINI_MODEL}): ${response.status}`);
 
         if (!response.ok) {
             const errorBody = await response.json();
             const errorMessage = errorBody.error?.message || 'Erro desconhecido na API Gemini';
+            
+            // Log detalhado para debug
+            console.error("Erro detalhado API Gemini:", errorBody);
+            
             logDebug('Erro API: ' + errorMessage);
-            throw new Error(`Gemini recusou: ${errorMessage}`);
+            throw new Error(`Gemini recusou (${GEMINI_MODEL}): ${errorMessage}`);
         }
 
         const data = await response.json();
@@ -259,12 +266,11 @@ IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta 
 
         const text = data.candidates[0].content.parts[0].text;
         
-        // Tentativa de parse direto (graças ao responseMimeType)
         try {
             return JSON.parse(text);
         } catch (e) {
-            // Fallback: Tenta limpar markdown se o modelo desobedeceu o MimeType
-            logDebug('JSON direto falhou, tentando limpeza...');
+            logDebug('JSON direto falhou, tentando limpeza manual...');
+            // Fallback robusto para limpar markdown ```json
             const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
             return JSON.parse(cleanedText);
         }
@@ -276,7 +282,6 @@ IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta 
 }
 
 async function generateCoverImage(story) {
-    // Melhorando o prompt da capa para garantir estilo consistente
     const stylePrompt = "children's book illustration style, high quality, vibrant colors, detailed, 8k resolution";
     const prompt = `Cover for children's book titled "${story.title}". Visual: ${story.setting}. No text, no words, no letters. ${stylePrompt}`;
     return await generateImage(prompt);
@@ -284,24 +289,20 @@ async function generateCoverImage(story) {
 
 async function generateImage(prompt) {
     logDebug('Solicitando imagem ao Replicate...');
-
-    // Adicionado "no text" para reforçar ilustrações limpas
     const safePrompt = `${prompt}, no text, no watermark, masterpiece`;
 
-    // Usando seu Worker (proxy)
     const startResp = await fetch(`${CONFIG.workerUrl}/replicate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             apiKey: CONFIG.replicateKey,
             payload: {
-                // Modelo Flux Schnell (rápido e boa qualidade)
                 version: "5599ed30703defd1d160a25a63321b4dec97101d98b4674bcc56e41f62f35637",
                 input: { 
                     prompt: safePrompt, 
                     go_fast: true, 
                     num_outputs: 1, 
-                    aspect_ratio: "3:4", // Formato retrato para livro
+                    aspect_ratio: "3:4", 
                     output_format: "png"
                 }
             }
@@ -315,11 +316,10 @@ async function generateImage(prompt) {
 
     let result = await startResp.json();
     let attempts = 0;
-    const maxAttempts = 40; // ~2 minutos de timeout
+    const maxAttempts = 40;
 
-    // Loop de verificação (Polling)
     while (result.status !== 'succeeded' && result.status !== 'failed' && result.status !== 'canceled' && attempts < maxAttempts) {
-        await sleep(3000); // Espera 3s
+        await sleep(3000);
         attempts++;
         
         const statusResp = await fetch(`${CONFIG.workerUrl}/replicate/status/${result.id}`, {
@@ -343,8 +343,6 @@ async function generateImage(prompt) {
         throw new Error('Replicate finalizou mas não devolveu URL da imagem.');
     }
 
-    // Baixa a imagem via Proxy para evitar erros de CORS no Canvas/PDF
-    // Nota: O URL do Replicate expira, então baixar agora é o correto
     const imgUrl = result.output[0];
     try {
         const resp = await fetch(imgUrl);
@@ -352,7 +350,7 @@ async function generateImage(prompt) {
 
         return new Promise(resolve => {
             const reader = new FileReader();
-            reader.onloadend = () => resolve(reader.result); // Retorna Base64
+            reader.onloadend = () => resolve(reader.result);
             reader.readAsDataURL(blob);
         });
     } catch (e) {
@@ -366,13 +364,11 @@ async function generatePDF(story, coverImage, illustrations, formData) {
     }
     const { jsPDF } = window.jspdf;
     
-    // Configuração A4
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageWidth = 210;
     const pageHeight = 297;
     const margin = 20;
 
-    // Mapa de ilustrações para acesso rápido
     let illustrationMap = {};
     illustrations.forEach(ill => illustrationMap[ill.pageNumber] = ill.image);
 
@@ -385,10 +381,9 @@ async function generatePDF(story, coverImage, illustrations, formData) {
         }
     }
     
-    // Adiciona título na capa (sobre a imagem, com fundo semitransparente para leitura)
     pdf.setFillColor(255, 255, 255);
     pdf.setGState(new pdf.GState({ opacity: 0.8 }));
-    pdf.rect(0, 200, pageWidth, 50, 'F'); // Faixa branca
+    pdf.rect(0, 200, pageWidth, 50, 'F');
     pdf.setGState(new pdf.GState({ opacity: 1.0 }));
     
     pdf.setFont("helvetica", "bold");
@@ -403,19 +398,15 @@ async function generatePDF(story, coverImage, illustrations, formData) {
     story.pages.forEach((page, index) => {
         pdf.addPage();
         
-        // Número da página
         pdf.setFontSize(10);
         pdf.setTextColor(100);
         pdf.text(`${index + 1}`, pageWidth - 10, pageHeight - 10);
 
-        // Se tem ilustração
         if (illustrationMap[page.pageNumber]) {
             try {
-                // Imagem na parte superior
                 const imgHeight = 150;
                 pdf.addImage(illustrationMap[page.pageNumber], 'PNG', margin, margin, pageWidth - (margin*2), imgHeight);
                 
-                // Texto na parte inferior
                 pdf.setFont("helvetica", "normal");
                 pdf.setFontSize(14);
                 pdf.setTextColor(0);
@@ -424,12 +415,9 @@ async function generatePDF(story, coverImage, illustrations, formData) {
                 console.error('Erro img pag ' + page.pageNumber, e);
             }
         } else {
-            // Página só de texto
             pdf.setFont("helvetica", "normal");
             pdf.setFontSize(16);
             pdf.setTextColor(0);
-            
-            // Centraliza verticalmente
             pdf.text(page.text, pageWidth / 2, pageHeight / 2, { align: 'center', maxWidth: pageWidth - (margin*2) });
         }
     });
@@ -530,7 +518,6 @@ function sleep(ms) {
 let darkMode = localStorage.getItem('darkMode') === 'true';
 
 function initDarkMode() {
-    // Remove botão existente
     const existing = document.getElementById('dark-mode-toggle');
     if (existing) existing.remove();
 
@@ -552,4 +539,4 @@ function initDarkMode() {
     if (darkMode) document.body.classList.add('dark-mode');
 }
 
-console.log('App Gerador de Livros v2.0 carregado com sucesso');
+console.log('App Gerador de Livros v2.1 (Fix Latest Model) carregado');
