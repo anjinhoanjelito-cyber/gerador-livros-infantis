@@ -637,3 +637,4 @@ function toggleDarkMode() {
 }
 
 console.log('✨ Gerador de Livros carregado!');
+
