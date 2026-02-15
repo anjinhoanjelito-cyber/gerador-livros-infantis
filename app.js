@@ -1,18 +1,19 @@
 let CONFIG = {
     geminiKey: localStorage.getItem('geminiKey') || '',
     replicateKey: localStorage.getItem('replicateKey') || '',
-    // Se o worker der problema, podemos tentar usar proxy direto ou chamar API direta se permitido (CORS)
     workerUrl: 'https://livros-infantis-api.anjinhoanjelito.workers.dev'
 };
 
 let currentBook = null;
 
-// Configuração do Modelo - Mude aqui se der erro 404 novamente
-// Opções que você pode tentar:
-// "gemini-1.5-flash-latest" (Recomendado)
-// "gemini-1.5-flash-001" (Versão específica estável)
-// "gemini-pro" (Versão 1.0 - Fallback se tudo falhar, mas é menos criativo)
-const GEMINI_MODEL = "gemini-1.5-flash-latest";
+// === SISTEMA DE ANTI-FALHA (FALLBACK) ===
+// O app tentará conectar nestes modelos em ordem.
+// Se o "flash" der erro 404, ele pula automaticamente para o "gemini-pro".
+const MODEL_ATTEMPTS = [
+    "gemini-1.5-flash",       // Tentativa 1: Mais rápido (Atualmente instável em algumas contas)
+    "gemini-1.5-flash-001",   // Tentativa 2: Versão específica
+    "gemini-pro"              // Tentativa 3: Versão 1.0 (Funciona sempre, mas é menos criativo)
+];
 
 window.addEventListener('DOMContentLoaded', () => {
     initializeApp();
@@ -144,7 +145,8 @@ async function generateBook(formData) {
 
         updateProgress(10, 'Escrevendo a história com IA...', 1);
         
-        const story = await callGeminiAPI(formData);
+        // Chamada corrigida para usar o sistema de fallback
+        const story = await callGeminiAPIWithFallback(formData);
         
         if (!story || !story.pages) {
             throw new Error('A história gerada está incompleta. Tente novamente.');
@@ -196,9 +198,29 @@ async function generateBook(formData) {
     }
 }
 
-async function callGeminiAPI(formData) {
-    logDebug(`Conectando ao modelo: ${GEMINI_MODEL}...`);
+// --- FUNÇÃO INTELIGENTE: Tenta vários modelos até conseguir ---
+async function callGeminiAPIWithFallback(formData) {
+    let lastError = null;
 
+    for (const model of MODEL_ATTEMPTS) {
+        try {
+            logDebug(`Tentando conectar com: ${model}...`);
+            const result = await callGeminiAPI(formData, model);
+            logDebug(`Conexão bem sucedida com ${model}!`);
+            return result;
+        } catch (error) {
+            console.warn(`Falha com ${model}:`, error);
+            lastError = error;
+            logDebug(`Erro no modelo ${model}, tentando o próximo...`);
+            // Continua o loop para tentar o próximo modelo da lista
+        }
+    }
+    
+    // Se sair do loop, todos falharam
+    throw new Error(`Falha em todos os modelos. Verifique sua chave API. Último erro: ${lastError.message}`);
+}
+
+async function callGeminiAPI(formData, modelName) {
     const prompt = `Você é um autor de livros infantis premiado. Crie uma história baseada nestes parâmetros:
 
 Tema: ${formData.theme}
@@ -206,78 +228,79 @@ Idade Alvo: ${formData.age} anos
 Tom da história: ${formData.tone}
 Número aproximado de páginas: ${formData.numPages}
 
-IMPORTANTE: Responda APENAS com um objeto JSON válido seguindo exatamente esta estrutura:
-
+IMPORTANTE: Responda APENAS com um objeto JSON válido. NÃO use markdown (sem \`\`\`json).
+Estrutura obrigatória:
 {
-  "title": "Título Criativo da História",
+  "title": "Título Criativo",
   "pages": [
     {
       "pageNumber": 1,
-      "text": "Texto da página 1...",
+      "text": "Texto da página...",
       "needsIllustration": true,
-      "illustrationPrompt": "Descrição detalhada da cena para um gerador de imagem, estilo infantil, em INGLÊS"
+      "illustrationPrompt": "Descrição da cena em INGLÊS para gerar imagem"
     }
   ],
-  "mainCharacters": [
-    {"name": "Nome", "visualReference": "Descrição visual curta"}
-  ],
-  "colorPalette": ["#hex1", "#hex2"],
-  "mood": "alegre/misterioso/etc",
-  "setting": "descrição do cenário"
+  "mainCharacters": [{"name": "Nome", "visualReference": "Descrição"}],
+  "colorPalette": ["#hex"],
+  "mood": "alegre",
+  "setting": "cenário"
 }`;
 
-    // --- CORREÇÃO AQUI: Usando o modelo definido no topo do arquivo ---
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${CONFIG.geminiKey}`;
+    // URL usando v1beta
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${CONFIG.geminiKey}`;
+
+    // Configuração varia dependendo do modelo (Pro vs Flash)
+    const generationConfig = {
+        temperature: 0.7,
+        maxOutputTokens: 8000
+    };
+
+    // Apenas modelos 1.5 suportam responseMimeType JSON nativo
+    // Se for gemini-pro, NÃO podemos enviar isso, senão dá erro 400
+    if (modelName.includes("1.5")) {
+        generationConfig.responseMimeType = "application/json";
+    }
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: generationConfig
+        })
+    });
+
+    if (!response.ok) {
+        const errorBody = await response.json();
+        const msg = errorBody.error?.message || response.statusText;
+        throw new Error(`[${response.status}] ${msg}`);
+    }
+
+    const data = await response.json();
+    
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+        throw new Error('Resposta vazia da IA');
+    }
+
+    let text = data.candidates[0].content.parts[0].text;
+
+    // LIMPEZA DE DADOS (Importante para o Gemini Pro que gosta de falar antes do JSON)
+    // 1. Remove marcadores de markdown
+    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+    
+    // 2. Encontra onde começa '{' e termina '}' para ignorar textos extras
+    const jsonStartIndex = text.indexOf('{');
+    const jsonEndIndex = text.lastIndexOf('}');
+    
+    if (jsonStartIndex !== -1 && jsonEndIndex !== -1) {
+        text = text.substring(jsonStartIndex, jsonEndIndex + 1);
+    }
 
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { 
-                    temperature: 0.7,
-                    maxOutputTokens: 8000,
-                    // Removemos o responseMimeType caso o modelo mude para gemini-pro (que não suporta esse campo)
-                    // Mas para 1.5 Flash ele ajuda muito. Vamos manter condicionalmente ou usar try/catch no parse.
-                    responseMimeType: "application/json" 
-                }
-            })
-        });
-
-        logDebug(`Status Gemini (${GEMINI_MODEL}): ${response.status}`);
-
-        if (!response.ok) {
-            const errorBody = await response.json();
-            const errorMessage = errorBody.error?.message || 'Erro desconhecido na API Gemini';
-            
-            // Log detalhado para debug
-            console.error("Erro detalhado API Gemini:", errorBody);
-            
-            logDebug('Erro API: ' + errorMessage);
-            throw new Error(`Gemini recusou (${GEMINI_MODEL}): ${errorMessage}`);
-        }
-
-        const data = await response.json();
-
-        if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
-            throw new Error('O Gemini não retornou nenhum conteúdo válido.');
-        }
-
-        const text = data.candidates[0].content.parts[0].text;
-        
-        try {
-            return JSON.parse(text);
-        } catch (e) {
-            logDebug('JSON direto falhou, tentando limpeza manual...');
-            // Fallback robusto para limpar markdown ```json
-            const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
-            return JSON.parse(cleanedText);
-        }
-
-    } catch (error) {
-        logDebug('Falha no Gemini: ' + error.message);
-        throw error;
+        return JSON.parse(text);
+    } catch (e) {
+        console.error("Texto recebido não é JSON:", text);
+        throw new Error("A IA respondeu, mas não no formato correto. Tente novamente.");
     }
 }
 
@@ -539,4 +562,4 @@ function initDarkMode() {
     if (darkMode) document.body.classList.add('dark-mode');
 }
 
-console.log('App Gerador de Livros v2.1 (Fix Latest Model) carregado');
+console.log('App Gerador de Livros v2.2 (Fallback System) carregado');
